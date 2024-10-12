@@ -25,7 +25,7 @@ import $t from '@utils/message.util';
 import { ChangeLocaleDto } from './dto/chagne-locale.dto';
 import { Locale } from '@/enums/user-locale.enum';
 import { ChangeNicknameDto } from './dto/chagne-nickname.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PasswordCheckPipe } from './pipe/password-check.pipe';
 import { WithdrawalDto } from './dto/withdrawal.dto';
 import { KeyValueDto } from './dto/key-value.dto';
@@ -37,7 +37,19 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @ApiOperation({
-    summary: '',
+    summary: '모든 유저 리스트 반환',
+    description: `
+      나와 친구를 맺지 않은 모든 유저 목록 반환
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '유저 목록 반환 성공',
+    type: [User],
+  })
+  @ApiResponse({
+    status: 500,
+    description: '시스템 에러 발생',
   })
   @Get()
   @UseGuards(AuthGuard())
@@ -47,22 +59,6 @@ export class AuthController {
     @Query('term') term: string,
   ): Promise<User[]> {
     return this.authService.getAllUsers(user, page, term);
-  }
-
-  @Post('/signup')
-  signUp(
-    @Body(ValidationPipe, PasswordCheckPipe) signUpDto: SignUpDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{ user: User }> {
-    return this.authService.createUser(signUpDto, response);
-  }
-
-  @Post('/signin')
-  signIn(
-    @Body(ValidationPipe) signInDto: SignInDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{ user: User }> {
-    return this.authService.signIn(signInDto, response);
   }
 
   @Get('/me')
@@ -87,6 +83,22 @@ export class AuthController {
   @Get('/:id')
   getById(@Param('id') userId: string) {
     return this.authService.getById(userId);
+  }
+
+  @Post('/signup')
+  signUp(
+    @Body(ValidationPipe, PasswordCheckPipe) signUpDto: SignUpDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ user: User }> {
+    return this.authService.createUser(signUpDto, response);
+  }
+
+  @Post('/signin')
+  signIn(
+    @Body(ValidationPipe) signInDto: SignInDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ user: User }> {
+    return this.authService.signIn(signInDto, response);
   }
 
   @Post('/password')
@@ -148,12 +160,6 @@ export class AuthController {
     return this.authService.updatePhotoUrl(user, file.location);
   }
 
-  @Patch('/delete-profile-photo')
-  @UseGuards(AuthGuard())
-  deleteProfilePhoto(@GetUser() user: User): Promise<void> {
-    return this.authService.deletePhoto(user);
-  }
-
   @Post('/withdrawal')
   @UseGuards(AuthGuard())
   async withdrawal(
@@ -173,5 +179,11 @@ export class AuthController {
       });
     }
     return res;
+  }
+
+  @Patch('/delete-profile-photo')
+  @UseGuards(AuthGuard())
+  deleteProfilePhoto(@GetUser() user: User): Promise<void> {
+    return this.authService.deletePhoto(user);
   }
 }

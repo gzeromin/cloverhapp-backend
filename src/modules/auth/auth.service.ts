@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -46,6 +47,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
+  private logger = new Logger('AuthService');
 
   async getAllUsers(user: User, page: string, term: string): Promise<User[]> {
     const currentPage: number = (page || 0) as number;
@@ -99,7 +101,8 @@ export class AuthService {
 
       return users;
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
