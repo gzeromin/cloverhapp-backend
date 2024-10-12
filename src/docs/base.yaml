@@ -1,0 +1,12 @@
+openapi: '3.0.3'
+info:
+  $ref: ./info/metadata.yaml
+servers:
+  - url: https://@HOST@
+tags:
+  - name: auth
+    description: auth logic
+  - name: stamp
+    description: stamp logic
+paths:
+  $ref: ./path/catalog.yaml

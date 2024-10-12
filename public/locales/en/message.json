@@ -1,0 +1,14 @@
+{
+  "FormError": {
+    "Duplicated": "'{value}' is already in use.",
+    "EqualNickname": "Please input another nickname different from '{value}'!",
+    "OverMaxLength": "{field} must be shorter than or equal to {value} characters.",
+    "UnderMinLength": "{field} must be longer than or equal to {value} characters.",
+    "NotEmail": "{value} must be an email",
+    "PasswordsNotMatch": "passwords do not match",
+    "Default": "Something went wrong."
+  },
+  "LoginFailed": "Please confirm your email or password.",
+  "ChangePasswordFailed": "Please confirm your current password.",
+  "ProfilePhotoUploadFailed": "Profile Photo can not be uploaded."
+}

@@ -1,0 +1,14 @@
+{
+  "FormError": {
+    "Duplicated": "'{value}'는 이미 이용중입니다.",
+    "EqualNickname": "현재 별명'{value}'과 다른 별명을 입력해주세요!",
+    "OverMaxLength": "최대 {value}자 이하 입력 바랍니다.",
+    "UnderMinLength": "최소 {value}자 이상 입력 바랍니다.",
+    "NotEmail": "이메일 형식이 아닙니다.",
+    "PasswordsNotMatch": "패스워드가 일치하지 않습니다.",
+    "Default": "문제가 발생했습니다."
+  },
+  "LoginFailed": "아이디와 비밀번호를 확인해주세요.",
+  "ChangePasswordFailed": "비밀번호를 확인해주세요.",
+  "ProfilePhotoUploadFailed": "프로필 사진이 저장되지 않았습니다."
+}

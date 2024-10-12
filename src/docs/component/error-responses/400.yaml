@@ -1,0 +1,21 @@
+description: |
+  리퀘스트가 부정일 때 레스폰스
+content:
+  application/json:
+    schema:
+      title: Bad Request
+      type: object
+      properties:
+        fields:
+          type: object
+          description: 'hogogh'
+        global:
+          type: array
+          description: '에러를 나타내는 배열'
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: '메세지'
+                example: 부정한 리퀘스트입니다.

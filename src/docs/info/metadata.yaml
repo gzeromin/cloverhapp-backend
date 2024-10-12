@@ -1,0 +1,15 @@
+version: 0.0.0
+title: HAPPTAMP - OPENAPI 3.0
+description: |
+  #### last update date
+    @LAST_UPDATE@
+
+  각 API처리 공통 규칙은 아래와 같다.
+  http status:<br/>
+
+  ####@[header]
+
+x-description-i18n:
+  en: |
+    #### last Modified
+      @LAST_UPDATE@

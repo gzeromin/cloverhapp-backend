@@ -1,0 +1,33 @@
+description: '정상처리'
+headers:
+  $ref: './headers/response_header.yaml'
+content:
+  application/json:
+    schema:
+      title: signup_res
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                minLength: 9
+                maxLength: 9
+                examp;e: AMS12345I
+                description: 코드
+              message:
+                type: string
+                maxLength: 300
+                example: 정상종료했습니다.
+                description: 메세지
+        result:
+          type: object
+          properties:
+            keiyMgkw:
+              type: string
+              maxLength: 60
+              example: 'hogoehgo'
+              description: 설명

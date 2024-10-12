@@ -1,0 +1,32 @@
+description: |
+  auth request parameter
+
+content:
+  application/json:
+    schema:
+      title: auth_req
+      type: object
+      properties:
+        nickname:
+          type: string
+          minLength: 3
+          maxLength: 20
+          example: '지뱅이'
+          description: 닉네임
+        email:
+          type: string
+          example: 'aaa@aaa.aaa'
+          description: 이메일
+        password:
+          type: string
+          minLength: 6
+          example: '1234567'
+          description: 비밀번호
+        locale:
+          type: string
+          example: '1'
+          description: 언어<br/>
+            0: En
+            1: Kr
+            2: Jp
+

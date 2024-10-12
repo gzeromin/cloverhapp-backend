@@ -1,0 +1,3 @@
+operatorId:
+  description: '오퍼레이터 아이디'
+  schema: { type: string }

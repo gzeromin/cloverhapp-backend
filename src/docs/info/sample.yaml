@@ -1,0 +1,10 @@
+version: 0.0.1
+title: ABCs - Core APIs
+description: |
+  #### last update date
+    @LAST_UPDATE@
+
+x-description-i18n:
+  en: |
+    #### last Modified
+      @LAST_UPDATE@

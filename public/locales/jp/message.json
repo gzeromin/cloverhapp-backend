@@ -1,0 +1,14 @@
+{
+  "FormError": {
+    "Duplicated": "'{value}'は既に使用されています。",
+    "EqualNickname": "現在のニックネーム'{value}'と異なるニックネームを入力して下さい。",
+    "OverMaxLength": "最大{value}文字以下入力して下さい。",
+    "UnderMinLength": "最小{value}文字以上入力して下さい。",
+    "NotEmail": "Eメールの形式で入力して下さい。",
+    "PasswordsNotMatch": "パスワードが一致していません。",
+    "Default": "問題が発生しました。"
+  },
+  "LoginFailed": "Eメールまたはパスワードのご確認お願いします。",
+  "ChangePasswordFailed": "パスワードのご確認おねがいします。",
+  "ProfilePhotoUploadFailed": "プロフィールの写真が保存されませんでした。"
+}

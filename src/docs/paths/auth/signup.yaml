@@ -1,0 +1,41 @@
+post:
+  tags:
+    - auth
+  operationId: signup
+  summary: signup
+  description: |
+    ## 이용장소
+    - 회원가입
+
+    ## 기능개요
+    1. 회원등록
+
+    ## 처리개요
+    1. 리퀘스트 항목 이메일, 닉네임, 비밀번호, 언어를 받아서 유저생성
+    2. 생성한 유저 DB에 저장
+    - 유니크 위반시 이상처리1 
+
+    ## 이상처리설명
+    1. 유니크 조항 위반시 폼에러 발생
+      - 코드 0000 반환
+      - 메세지 xxx 반환
+
+  #헤더 정의
+  parameters:
+    - name: header
+      in: header
+      description: 공통헤더
+      required: false
+      schema:
+        $ref: '../../components/parameters/request_hedaer.yaml'
+  requestBody:
+    $ref: '../../components/requests/auth_req.yaml'
+  responses:
+    '200':
+      $ref: '../../components/responses/auth_res.yaml'
+    '400':
+      $ref: '../../components/error-responses/400.yaml'
+    '404':
+      $ref: '../../components/error-responses/404.yaml'
+    '500':
+      $ref: '../../components/error-responses/500.yaml'
