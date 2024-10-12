@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,6 +39,7 @@ export class HappService {
     private bookRepository: Repository<Book>,
     private configService: ConfigService,
   ) {}
+  private logger = new Logger('HappService');
 
   async getAllHapps(page: string, count: string): Promise<Happ[]> {
     const currentPage: number = (page || 0) as number;

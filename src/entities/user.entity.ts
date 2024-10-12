@@ -5,9 +5,16 @@ import { Locale } from 'src/enums/user-locale.enum';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
 import Common from './common.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class User extends Common {
+  @ApiProperty({
+    description: '닉네임',
+    example: 'abcd',
+    minLength: 3,
+    maxLength: 15,
+  })
   @IsString()
   @MinLength(3)
   @MaxLength(15)
