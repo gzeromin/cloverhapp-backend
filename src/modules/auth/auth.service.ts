@@ -154,6 +154,7 @@ export class AuthService {
 
       return { user: createdUser };
     } catch (error) {
+      this.logger.error(error);
       if (error instanceof QueryFailedError) {
         const errorMessages = [(error.driverError as any).detail];
         const keys = [

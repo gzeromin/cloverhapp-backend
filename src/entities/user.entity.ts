@@ -23,6 +23,10 @@ export class User extends Common {
   })
   nickname: string;
 
+  @ApiProperty({
+    description: '이메일',
+    example: 'abcd@abcd.abcd',
+  })
   @IsEmail()
   @Column({
     unique: true,

@@ -31,7 +31,7 @@ export class BadRequestFilter implements ExceptionFilter {
     if (isBadRequest) {
       // make to formError
       if (Array.isArray(errorMessage)) {
-        const locale = request.user.locale ? request.user.locale : Locale.Kr;
+        const locale = request.user?.locale ? request.user.locale : Locale.Kr;
         errorBody.error = FormErrorEnum.Error;
         errorBody.message = formErrorUtils(
           Object.keys(request.body),

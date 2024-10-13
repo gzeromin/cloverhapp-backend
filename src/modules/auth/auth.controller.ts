@@ -25,7 +25,7 @@ import $t from '@utils/message.util';
 import { ChangeLocaleDto } from './dto/chagne-locale.dto';
 import { Locale } from '@/enums/user-locale.enum';
 import { ChangeNicknameDto } from './dto/chagne-nickname.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PasswordCheckPipe } from './pipe/password-check.pipe';
 import { WithdrawalDto } from './dto/withdrawal.dto';
 import { KeyValueDto } from './dto/key-value.dto';
@@ -85,6 +85,30 @@ export class AuthController {
     return this.authService.getById(userId);
   }
 
+  @ApiOperation({
+    summary: '회원가입',
+    description: `
+      회원가입을 처리하는 API입니다. 
+      입력된 정보가 유효하면 새로운 유저가 생성됩니다.
+    `,
+  })
+  @ApiBody({
+    description: '회원가입에 필요한 정보',
+    type: SignUpDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '유저 생성 성공',
+    type: User,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '폼 에러 발생',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '시스템 에러 발생',
+  })
   @Post('/signup')
   signUp(
     @Body(ValidationPipe, PasswordCheckPipe) signUpDto: SignUpDto,
