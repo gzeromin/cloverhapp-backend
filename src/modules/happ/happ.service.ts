@@ -341,7 +341,6 @@ export class HappService {
           Tags.every((newTag) => newTag.id !== oldTag.id),
         );
         happ.Tags = await this.tagService.saveTagList(Tags);
-        console.log(happ.Tags);
       }
 
       if (Book) {
