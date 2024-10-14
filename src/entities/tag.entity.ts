@@ -11,6 +11,11 @@ export class Tag extends Common {
   })
   name: string;
 
+  @Column({
+    default: 1,
+  })
+  enrolledCount: number;
+
   @ManyToMany(() => Happ, (happ) => happ.Tags, { eager: false })
   Happs: Happ[];
 

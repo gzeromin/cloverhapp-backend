@@ -1,7 +1,7 @@
 import { Tag } from '@/entities/tag.entity';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class TagService {
@@ -28,6 +28,42 @@ export class TagService {
       return await query.getMany();
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async saveTagList(tagList: Tag[]): Promise<Tag[]> {
+    // 이미 존재하는 태그인지 확인하기
+    const existTags = await this.tagRepository.findBy({
+      name: In(tagList.filter((f) => !f.id).map((e) => e.name)),
+    });
+
+    // 태그목록 추가
+    const newTags = tagList.map((e) => {
+      const existTag = existTags.filter((f) => f.name === e.name);
+      if (existTag.length > 0) {
+        const countUpTag = existTag[0];
+        countUpTag.enrolledCount += 1;
+        e = countUpTag;
+      }
+      if (!e.id) {
+        e = this.tagRepository.create(e);
+      }
+      return e;
+    });
+
+    return await this.tagRepository.save(newTags);
+  }
+
+  async countDownTagList(tagList: Tag[]): Promise<Tag[]> {
+    try {
+      // CountDown Tag EnrolledCount
+      const countDownTags = tagList.map((e) => ({
+        ...e,
+        enrolledCount: e.enrolledCount - 1,
+      }));
+      return await this.tagRepository.save(countDownTags);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
   }
 }
