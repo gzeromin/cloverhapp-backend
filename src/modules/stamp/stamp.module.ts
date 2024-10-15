@@ -8,6 +8,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from '@/middlewares/multerS3.middleware';
 import { Tag } from '@/entities/tag.entity';
+import { TagService } from '../tag/tag.service';
 
 @Module({
   imports: [
@@ -22,6 +23,6 @@ import { Tag } from '@/entities/tag.entity';
     AuthModule,
   ],
   controllers: [StampController],
-  providers: [StampService],
+  providers: [StampService, TagService, ConfigService],
 })
 export class StampModule {}

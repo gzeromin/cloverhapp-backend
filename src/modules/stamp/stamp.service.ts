@@ -5,21 +5,25 @@ import formErrorUtils from '@/utils/form-error.utils';
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { CreateStampDto } from './dto/create-stamp.dto';
-import { Tag } from '@/entities/tag.entity';
+import { TagService } from '../tag/tag.service';
+import { ConfigService } from '@nestjs/config';
+import { s3DeleteFile } from '@/utils/multerS3.util';
 
 @Injectable()
 export class StampService {
   constructor(
     @InjectRepository(Stamp)
     private stampRepository: Repository<Stamp>,
-    @InjectRepository(Tag)
-    private tagRepository: Repository<Tag>,
+    private readonly tagService: TagService,
+    private configService: ConfigService,
   ) {}
+  private logger = new Logger('StampService');
 
   async getAllStamps(page: string, count: string): Promise<Stamp[]> {
     const currentPage: number = (page || 0) as number;
@@ -38,46 +42,35 @@ export class StampService {
   }
 
   async createStamp(
-    stampData: string,
+    stampData: CreateStampDto,
     user: User,
     url: string,
   ): Promise<Stamp> {
-    const {
-      name,
-      description,
-      droplet,
-      type,
-      status,
-      Tags,
-      notForSale,
-    }: CreateStampDto = JSON.parse(stampData);
-
-    const stamp: Stamp = this.stampRepository.create({
-      name,
-      description,
-      droplet,
-      type,
-      status,
-      url,
-      notForSale,
-      userId: user.id,
-    });
     try {
+      const { name, description, droplet, type, status, Tags, notForSale } =
+        stampData;
+      const stamp: Stamp = this.stampRepository.create({
+        name,
+        description,
+        droplet,
+        type,
+        status,
+        url,
+        notForSale,
+        userId: user.id,
+      });
+      // 태그목록 추가
       if (Tags) {
-        // 태그목록 추가
-        const newTags = await Promise.all(
-          Tags.map(async (e) => {
-            if (!e.id) {
-              return await this.tagRepository.save(e);
-            }
-            return e;
-          }),
-        );
-        stamp.Tags = newTags;
+        stamp.Tags = await this.tagService.saveTagList(Tags);
       }
       const createdStamp = await this.stampRepository.save(stamp);
       return createdStamp;
     } catch (error) {
+      this.logger.error(error);
+      // 스탬프 아이콘 삭제
+      if (url) {
+        await s3DeleteFile(this.configService, [url]);
+      }
       if (error instanceof QueryFailedError) {
         const errorMessages = [(error.driverError as any).detail];
         const keys = ['name', 'description', 'droplet', 'type', 'status'];

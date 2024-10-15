@@ -18,11 +18,21 @@ import { User } from '@/entities/user.entity';
 import { GetUser } from '../auth/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateStampDto } from './dto/create-stamp.dto';
+import { plainToClass } from 'class-transformer';
+import { validate } from 'class-validator';
+import validationErrorUtils from '@/utils/validation-error.utils';
+import { FormException } from '@/exceptions/form.exception';
+import { s3DeleteFile } from '@/utils/multerS3.util';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('stamp')
 @Controller('stamp')
 export class StampController {
-  constructor(private stampService: StampService) {}
+  constructor(
+    private stampService: StampService,
+    private configService: ConfigService,
+  ) {}
   private logger = new Logger('StampController');
 
   @ApiOperation({
@@ -42,11 +52,23 @@ export class StampController {
   @Post()
   @UseGuards(AuthGuard())
   @UseInterceptors(FileInterceptor('stamp-icon'))
-  createStamp(
+  async createStamp(
     @GetUser() user: User,
     @UploadedFile() file: Express.MulterS3.File,
-    @Body('stamp-data') stampData: string,
+    @Body() body: { 'stamp-data': string },
   ): Promise<Stamp> {
+    const stampData: CreateStampDto = plainToClass(
+      CreateStampDto,
+      JSON.parse(body['stamp-data']),
+    );
+    const errors = await validate(stampData);
+    if (errors.length > 0) {
+      // 스탬프 아이콘 삭제
+      if (file) {
+        await s3DeleteFile(this.configService, [file.location]);
+      }
+      throw new FormException(validationErrorUtils(errors, user.locale));
+    }
     return this.stampService.createStamp(stampData, user, file.location);
   }
 

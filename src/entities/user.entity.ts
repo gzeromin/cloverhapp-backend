@@ -1,18 +1,11 @@
 import * as bcrypt from 'bcryptjs';
-import {
-  IsEmail,
-  IsString,
-  maxLength,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsString, Max, MaxLength, MinLength } from 'class-validator';
 import { Happ } from 'src/entities/Happ.entity';
 import { Locale } from 'src/enums/user-locale.enum';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
 import Common from './common.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { KeyValue } from '@/enums/key-value.enum';
 
 @Entity()
 export class User extends Common {
@@ -88,7 +81,9 @@ export class User extends Common {
 
   @ApiProperty({
     description: '물방울, 햅탬프에서 거래시 사용',
+    maximum: 9999999999,
   })
+  @Max(9999999999)
   @Column({
     default: 1000,
   })
