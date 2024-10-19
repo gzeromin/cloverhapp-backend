@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Happ } from '@/entities/happ.entity';
 import { CreateHappDto } from './dto/create-happ.dto';
 import { HappService } from './happ.service';
 import { GetUser } from '@/modules/auth/get-user.decorator';
@@ -26,6 +25,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateByDndDto } from './dto/update-by-dnd.dto';
 import { CreateHappByDndDto } from './dto/create-happ-by-dnd.dto';
 import { UpdateHappResDto } from './dto/updated-happ-res-dto';
+import { Happ } from '@/entities/happ.entity';
 
 @ApiTags('happ')
 @Controller('happ')

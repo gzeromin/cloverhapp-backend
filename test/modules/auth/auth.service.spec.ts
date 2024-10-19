@@ -5,7 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '@/entities/user.entity';
 import { Notif } from '@/entities/notif.entity';
-import { Happ } from '@/entities/happ.entity';
 import { Stamp } from '@/entities/stamp.entity';
 import { UserStamp } from '@/entities/user-stamp.entity';
 import { Friend } from '@/entities/friend.entity';
@@ -14,6 +13,7 @@ import { Response } from 'express';
 import { SignUpDto } from '@/modules/auth/dto/sign-up.dto';
 import { Locale } from '@/enums/user-locale.enum';
 import { readJson } from 'test/utils/readJson';
+import { Happ } from '@/entities/happ.entity';
 
 describe('AuthService', () => {
   let service: AuthService;

@@ -1,5 +1,5 @@
-import { PickType } from '@nestjs/swagger';
 import { Happ } from '@/entities/happ.entity';
+import { PickType } from '@nestjs/swagger';
 import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class UpdateHappDto extends PickType(Happ, [

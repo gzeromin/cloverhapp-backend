@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { In, Repository } from 'typeorm';
-import { Happ } from '../../entities/happ.entity';
 import { CreateHappDto } from './dto/create-happ.dto';
 import { UpdateHappDto } from './dto/update-happ.dto';
 import { UpdateByDndDto } from './dto/update-by-dnd.dto';
@@ -22,6 +21,7 @@ import { MoneyUnit } from '@/enums/money-unit.enum';
 import { UpdateHappResDto } from './dto/updated-happ-res-dto';
 import { Book } from '@/entities/book.entity';
 import { TagService } from '../tag/tag.service';
+import { Happ } from '@/entities/happ.entity';
 
 @Injectable()
 export class HappService {
