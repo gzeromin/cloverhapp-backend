@@ -1,11 +1,12 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Happ } from '../../entities/happ.entity';
 import { CreateHappDto } from './dto/create-happ.dto';
 import { UpdateHappDto } from './dto/update-happ.dto';
@@ -13,15 +14,14 @@ import { UpdateByDndDto } from './dto/update-by-dnd.dto';
 import { CreateHappByDndDto } from './dto/create-happ-by-dnd.dto';
 import { getPosition, isFuture } from '@/utils/date.util';
 import { TodoStatus } from '@/enums/todo-status.enum';
-import { Tag } from '@/entities/tag.entity';
 import { s3DeleteFile } from '@/utils/multerS3.util';
 import { ConfigService } from '@nestjs/config';
 import { UserStamp } from '@/entities/user-stamp.entity';
-import { Stamp } from '@/entities/stamp.entity';
 import { StampType } from '@/enums/stamp-type.enum';
 import { MoneyUnit } from '@/enums/money-unit.enum';
 import { UpdateHappResDto } from './dto/updated-happ-res-dto';
 import { Book } from '@/entities/book.entity';
+import { TagService } from '../tag/tag.service';
 
 @Injectable()
 export class HappService {
@@ -30,14 +30,12 @@ export class HappService {
     private happRepository: Repository<Happ>,
     @InjectRepository(UserStamp)
     private userStampRepository: Repository<UserStamp>,
-    @InjectRepository(Stamp)
-    private stampRepository: Repository<Stamp>,
-    @InjectRepository(Tag)
-    private tagRepository: Repository<Tag>,
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
     private configService: ConfigService,
+    private readonly tagService: TagService,
   ) {}
+  private logger = new Logger('HappService');
 
   async getAllHapps(page: string, count: string): Promise<Happ[]> {
     const currentPage: number = (page || 0) as number;
@@ -48,7 +46,7 @@ export class HappService {
         .leftJoinAndSelect('happ.User', 'User')
         .leftJoinAndSelect('happ.UserStamp', 'UserStamp')
         .leftJoinAndSelect('UserStamp.Stamp', 'Stamp')
-        .orderBy('happ.createdAt', 'DESC')
+        .orderBy('happ.startTime', 'DESC')
         .skip(currentPage * perPage)
         .take(perPage)
         .getMany();
@@ -71,23 +69,24 @@ export class HappService {
     }
   }
 
-  async getAllHappsByUserId(
-    page: string,
+  async getDailyHappsPerPage(
+    skip: string,
     count: string,
     userId: string,
   ): Promise<Happ[]> {
-    const currentPage: number = (page || 0) as number;
-    const perPage: number = (count || 8) as number;
+    const skipCount: number = (skip || 0) as number;
+    const perPage: number = (count || 20) as number;
     try {
       const happs = await this.happRepository
         .createQueryBuilder('happ')
         .leftJoinAndSelect('happ.User', 'User')
         .leftJoinAndSelect('happ.UserStamp', 'UserStamp')
         .leftJoinAndSelect('happ.Book', 'Book')
+        .leftJoinAndSelect('happ.Tags', 'Tags')
         .leftJoinAndSelect('UserStamp.Stamp', 'Stamp')
         .where({ userId })
         .orderBy('happ.startTime', 'DESC')
-        .skip(currentPage * perPage)
+        .skip(skipCount)
         .take(perPage)
         .getMany();
 
@@ -112,24 +111,26 @@ export class HappService {
   async getHappsByDate(fullDate: string, userId: string): Promise<Happ[]> {
     const date = new Date(fullDate);
 
-    // 3개월 전
+    // 2개월 전
     const startDate = new Date(date);
-    startDate.setMonth(startDate.getMonth() - 3);
+    startDate.setMonth(startDate.getMonth() - 2);
 
-    // 1주일 후
+    // 1개월 후
     const endDate = new Date(date);
-    endDate.setDate(endDate.getDate() + 8);
+    endDate.setMonth(endDate.getMonth() + 1);
 
     const query = this.happRepository.createQueryBuilder('happ');
     query
       .leftJoinAndSelect('happ.UserStamp', 'UserStamp')
       .leftJoinAndSelect('happ.Book', 'Book')
+      .leftJoinAndSelect('happ.Tags', 'Tags')
       .leftJoinAndSelect('UserStamp.Stamp', 'Stamp')
       .where(
         `happ.userId = :userId 
        AND happ.startTime BETWEEN :startDate AND :endDate`,
         { userId, startDate, endDate },
-      );
+      )
+      .orderBy('happ.startTime', 'DESC');
 
     const result = await query.getMany();
     return result;
@@ -197,20 +198,10 @@ export class HappService {
         todo,
         status,
       });
-      happ.UserStamp = UserStamp;
-      happ.User = user;
       happ.Friends = Friends;
+
       if (Tags) {
-        // 태그목록 추가
-        const newTags = await Promise.all(
-          Tags.map(async (e) => {
-            if (!e.id) {
-              return await this.tagRepository.save(e);
-            }
-            return e;
-          }),
-        );
-        happ.Tags = newTags;
+        happ.Tags = await this.tagService.saveTagList(Tags);
       }
 
       if (Book) {
@@ -232,7 +223,7 @@ export class HappService {
         const userStamp = happ.UserStamp;
         userStamp.Book = happ.Book;
         userStamp.bookPercent = happ.bookPercent;
-        console.log(userStamp);
+
         // UserStamp 갱신
         await this.userStampRepository.save(userStamp);
         happ.UserStamp.Book = Book;
@@ -257,9 +248,20 @@ export class HappService {
       }
 
       // save Happ
-      return await this.happRepository.save(happList);
+      const savedHappList = await this.happRepository.save(happList);
+
+      const happs = await this.happRepository
+        .createQueryBuilder('happ')
+        .leftJoinAndSelect('happ.User', 'User')
+        .leftJoinAndSelect('happ.UserStamp', 'UserStamp')
+        .leftJoinAndSelect('UserStamp.Stamp', 'Stamp')
+        .orderBy('happ.startTime', 'DESC')
+        .where({ id: In(savedHappList.map((e) => e.id)) })
+        .getMany();
+
+      return happs;
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
       throw new InternalServerErrorException();
     }
   }
@@ -289,7 +291,7 @@ export class HappService {
       happ.User = user;
       return happ;
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
       throw new InternalServerErrorException();
     }
   }
@@ -349,16 +351,32 @@ export class HappService {
         deletedTags = happ.Tags.filter((oldTag) =>
           Tags.every((newTag) => newTag.id !== oldTag.id),
         );
-        // 태그목록 추가
-        const newTags = await Promise.all(
-          Tags.map(async (e) => {
-            if (!e.id) {
-              return await this.tagRepository.save(e);
-            }
-            return e;
-          }),
-        );
-        happ.Tags = newTags;
+        happ.Tags = await this.tagService.saveTagList(Tags);
+      }
+
+      if (Book) {
+        if (!Book.id) {
+          const savedBook = await this.bookRepository.findOneBy({
+            isbn: Book.isbn,
+          });
+          if (savedBook) {
+            happ.Book = savedBook;
+          } else {
+            const newBook = this.bookRepository.create(Book);
+            const savedNewBook = await this.bookRepository.save(newBook);
+            happ.Book = savedNewBook;
+          }
+        } else {
+          happ.Book = Book;
+        }
+        happ.bookPercent = bookPercent;
+        const userStamp = happ.UserStamp;
+        userStamp.Book = happ.Book;
+        userStamp.bookPercent = happ.bookPercent;
+
+        // UserStamp 갱신
+        await this.userStampRepository.save(userStamp);
+        happ.UserStamp.Book = Book;
       }
 
       // UPDATE
@@ -383,31 +401,8 @@ export class HappService {
         });
       }
 
-      // 삭제된 태그가 현재 사용중인지 검색
-      deletedTags.forEach(async (e) => {
-        // 태그를 사용하는 스탬프 수 조회
-        const count1 = await this.happRepository
-          .createQueryBuilder('happ')
-          .leftJoinAndSelect('happ.Tags', 'tag') // stamp 엔터티와 Tags 관계를 조인합니다
-          .where('tag.id = :tagId', { tagId: e.id }) // tag.id가 특정 태그의 ID와 일치하는지 확인합니다
-          .getCount();
-        const count2 = await this.userStampRepository
-          .createQueryBuilder('userStamp')
-          .leftJoinAndSelect('userStamp.Tags', 'tag') // stamp 엔터티와 Tags 관계를 조인합니다
-          .where('tag.id = :tagId', { tagId: e.id }) // tag.id가 특정 태그의 ID와 일치하는지 확인합니다
-          .getCount();
-        const count3 = await this.stampRepository
-          .createQueryBuilder('stamp')
-          .leftJoinAndSelect('stamp.Tags', 'tag') // stamp 엔터티와 Tags 관계를 조인합니다
-          .where('tag.id = :tagId', { tagId: e.id }) // tag.id가 특정 태그의 ID와 일치하는지 확인합니다
-          .getCount();
-
-        const count = count1 + count2 + count3;
-        // 사용 중이지 않은 태그인 경우 삭제
-        if (count === 0) {
-          await this.tagRepository.delete(e.id);
-        }
-      });
+      // 삭제한 태그에 대해서 등록수 1 감소 시킴
+      this.tagService.countDownTagList(deletedTags);
 
       // CREATE
       const created = await this.happRepository.save(happList);
@@ -418,17 +413,21 @@ export class HappService {
     }
   }
 
-  async updateByDnd(updateByDndDto: UpdateByDndDto): Promise<Happ> {
-    const { id, startTime, positionX, positionY } = updateByDndDto;
-    const happ = await this.getHappById(id);
-    happ.startTime = startTime;
-    happ.endTime = startTime;
-    happ.positionX = positionX;
-    happ.positionY = positionY;
-
-    // 스탬프 저장(비동기)
-    this.happRepository.save(happ);
-    return happ;
+  async updateByDnd(updateByDndDto: UpdateByDndDto): Promise<UpdateHappResDto> {
+    try {
+      const { id, startTime, positionX, positionY } = updateByDndDto;
+      const happ = await this.getHappById(id);
+      happ.startTime = startTime;
+      happ.endTime = startTime;
+      happ.positionX = positionX;
+      happ.positionY = positionY;
+      // 스탬프 저장(비동기)
+      this.happRepository.save(happ);
+      return { updated: happ, created: [] };
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async completeTodo(id: string): Promise<Happ> {

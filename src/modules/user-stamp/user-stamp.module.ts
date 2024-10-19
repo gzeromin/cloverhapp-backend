@@ -7,6 +7,7 @@ import { User } from '@/entities/user.entity';
 import { Stamp } from '@/entities/stamp.entity';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { Tag } from '@/entities/tag.entity';
+import { TagService } from '../tag/tag.service';
 
 @Module({
   imports: [
@@ -14,6 +15,6 @@ import { Tag } from '@/entities/tag.entity';
     AuthModule,
   ],
   controllers: [UserStampController],
-  providers: [UserStampService],
+  providers: [UserStampService, TagService],
 })
 export class UserStampModule {}

@@ -33,7 +33,7 @@ export class HappController {
   constructor(private happService: HappService) {}
   private logger = new Logger('HappController');
 
-  @Get('/list')
+  @Get('/page')
   getAllHapp(
     @Query('page') page: string,
     @Query('count') count: string,
@@ -44,14 +44,13 @@ export class HappController {
   @ApiOperation({
     summary: '',
   })
-  @Get('/list/user')
-  @UseGuards(AuthGuard())
-  getAllHappsByUserId(
-    @Query('page') page: string,
+  @Get('/page/:userId')
+  getDailyHappsPerPage(
+    @Query('skip') skip: string,
     @Query('count') count: string,
-    @GetUser() user: User,
+    @Param('userId') userId: string,
   ): Promise<Happ[]> {
-    return this.happService.getAllHappsByUserId(page, count, user.id);
+    return this.happService.getDailyHappsPerPage(skip, count, userId);
   }
 
   @ApiOperation({
@@ -115,6 +114,7 @@ export class HappController {
     @Body('happ-data') happData: string,
   ): Promise<UpdateHappResDto> {
     const updateHappDto: UpdateHappDto = JSON.parse(happData);
+    console.log(updateHappDto);
     if (files && files.length > 0) {
       updateHappDto.uploadedImages = files.map((file) => file.location);
     }
@@ -122,10 +122,12 @@ export class HappController {
   }
 
   @ApiOperation({
-    summary: 'Happ의 위치 변경',
+    summary: 'Drag And Drop으로 Happ의 위치 변경',
   })
   @Patch('/byDnd')
-  updateStartTime(@Body() updateByDndDto: UpdateByDndDto): Promise<Happ> {
+  updateStartTime(
+    @Body() updateByDndDto: UpdateByDndDto,
+  ): Promise<UpdateHappResDto> {
     return this.happService.updateByDnd(updateByDndDto);
   }
 

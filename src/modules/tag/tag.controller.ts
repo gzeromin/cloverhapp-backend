@@ -8,6 +8,6 @@ export class TagController {
 
   @Get()
   getTags(@Query('page') page: string, @Query('term') term: string) {
-    return this.tagService.getTag(page, term);
+    return this.tagService.getTags(page, term);
   }
 }

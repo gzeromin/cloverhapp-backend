@@ -25,19 +25,37 @@ import $t from '@utils/message.util';
 import { ChangeLocaleDto } from './dto/chagne-locale.dto';
 import { Locale } from '@/enums/user-locale.enum';
 import { ChangeNicknameDto } from './dto/chagne-nickname.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PasswordCheckPipe } from './pipe/password-check.pipe';
 import { WithdrawalDto } from './dto/withdrawal.dto';
 import { KeyValueDto } from './dto/key-value.dto';
 import { SentenceDto } from './dto/sentence.dto';
+import { UserStampService } from '../user-stamp/user-stamp.service';
+import { UserStamp } from '@/entities/user-stamp.entity';
+import { loginResDto } from './dto/login-res.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly userStampService: UserStampService,
+  ) {}
 
   @ApiOperation({
-    summary: '',
+    summary: '모든 유저 리스트 반환',
+    description: `
+      나와 친구를 맺지 않은 모든 유저 목록 반환
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '유저 목록 반환 성공',
+    type: [User],
+  })
+  @ApiResponse({
+    status: 500,
+    description: '시스템 에러 발생',
   })
   @Get()
   @UseGuards(AuthGuard())
@@ -49,27 +67,12 @@ export class AuthController {
     return this.authService.getAllUsers(user, page, term);
   }
 
-  @Post('/signup')
-  signUp(
-    @Body(ValidationPipe, PasswordCheckPipe) signUpDto: SignUpDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{ user: User }> {
-    return this.authService.createUser(signUpDto, response);
-  }
-
-  @Post('/signin')
-  signIn(
-    @Body(ValidationPipe) signInDto: SignInDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{ user: User }> {
-    return this.authService.signIn(signInDto, response);
-  }
-
   @Get('/me')
   @UseGuards(AuthGuard())
-  me(@GetUser() user: User) {
+  async me(@GetUser() user: User): Promise<loginResDto> {
     delete user.password;
-    return { user };
+    const userStamps = await this.userStampService.getAllUserStamps(user.id);
+    return { user, userStamps };
   }
 
   @Get('/logout')
@@ -87,6 +90,50 @@ export class AuthController {
   @Get('/:id')
   getById(@Param('id') userId: string) {
     return this.authService.getById(userId);
+  }
+
+  @ApiOperation({
+    summary: '회원가입',
+    description: `
+      회원가입을 처리하는 API입니다. 
+      입력된 정보가 유효하면 새로운 유저가 생성됩니다.
+    `,
+  })
+  @ApiBody({
+    description: '회원가입에 필요한 정보',
+    type: SignUpDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '유저 생성 성공',
+    type: User,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '폼 에러 발생',
+  })
+  @ApiResponse({
+    status: 500,
+    description: '시스템 에러 발생',
+  })
+  @Post('/signup')
+  async signUp(
+    @Body(ValidationPipe, PasswordCheckPipe) signUpDto: SignUpDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<loginResDto> {
+    const user = await this.authService.createUser(signUpDto, response);
+    const userStamps = await this.userStampService.getAllUserStamps(user.id);
+    return { user, userStamps };
+  }
+
+  @Post('/signin')
+  async signIn(
+    @Body(ValidationPipe) signInDto: SignInDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<loginResDto> {
+    const user = await this.authService.signIn(signInDto, response);
+    const userStamps = await this.userStampService.getAllUserStamps(user.id);
+    return { user, userStamps };
   }
 
   @Post('/password')
@@ -148,12 +195,6 @@ export class AuthController {
     return this.authService.updatePhotoUrl(user, file.location);
   }
 
-  @Patch('/delete-profile-photo')
-  @UseGuards(AuthGuard())
-  deleteProfilePhoto(@GetUser() user: User): Promise<void> {
-    return this.authService.deletePhoto(user);
-  }
-
   @Post('/withdrawal')
   @UseGuards(AuthGuard())
   async withdrawal(
@@ -173,5 +214,11 @@ export class AuthController {
       });
     }
     return res;
+  }
+
+  @Patch('/delete-profile-photo')
+  @UseGuards(AuthGuard())
+  deleteProfilePhoto(@GetUser() user: User): Promise<void> {
+    return this.authService.deletePhoto(user);
   }
 }

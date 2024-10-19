@@ -19,6 +19,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateUserStampDto } from './dto/update-user-stamp.dto';
 import { UpdateIsDisplayDto } from './dto/update-is-display.dto';
 import { UserStamp } from '@/entities/user-stamp.entity';
+import { SaveUserStampResDto } from './dto/save-user-stamp-res.dto';
 
 @ApiTags('user-stamp')
 @Controller('user-stamp')
@@ -27,15 +28,8 @@ export class UserStampController {
   private logger = new Logger('UserStampController');
 
   @Get()
-  @UseGuards(AuthGuard())
-  getAllUserStamps(@GetUser() user: User) {
-    return this.userStampService.getAllUserStamps(user.id);
-  }
-
-  @Get('/display')
-  @UseGuards(AuthGuard())
-  getDisplayUserStamps(@GetUser() user: User) {
-    return this.userStampService.getDisplayUserStamps(user.id);
+  getAllUserStamps(userId: string) {
+    return this.userStampService.getAllUserStamps(userId);
   }
 
   @Get('/page')
@@ -55,27 +49,27 @@ export class UserStampController {
 
   @Post()
   @UseGuards(AuthGuard())
-  saveStamp(@GetUser() user: User, @Body() data: SaveUserStampDto) {
+  saveStamp(
+    @GetUser() user: User,
+    @Body() data: SaveUserStampDto,
+  ): Promise<SaveUserStampResDto> {
     return this.userStampService.saveUserStamp(user, data);
   }
 
   @Post('/:id')
   @UseGuards(AuthGuard())
-  updateStamp(@Param('id') id: string, @Body() data: UpdateUserStampDto) {
+  updateStamp(
+    @Param('id') id: string,
+    @Body() data: UpdateUserStampDto,
+  ): Promise<UserStamp[]> {
     return this.userStampService.updateUserStamp(id, data);
-  }
-
-  @Patch('/is-display')
-  @UseGuards(AuthGuard())
-  setVisible(@Body() updateIsDisplayDto: UpdateIsDisplayDto) {
-    return this.userStampService.updateIsDisplay(updateIsDisplayDto);
   }
 
   @ApiOperation({
     summary: '',
   })
   @Delete('/:id')
-  deleteStamp(@Param('id') id: string): Promise<UserStamp> {
+  deleteStamp(@Param('id') id: string): Promise<UserStamp[]> {
     return this.userStampService.deleteUserStamp(id);
   }
 }

@@ -8,11 +8,12 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from '@/middlewares/multerS3.middleware';
 import { Happ } from '@/entities/happ.entity';
-import { Tag } from '@/entities/tag.entity';
 import { Comment } from '@/entities/comment.entity';
 import { UserStamp } from '@/entities/user-stamp.entity';
-import { Stamp } from '@/entities/stamp.entity';
 import { Book } from '@/entities/book.entity';
+import { TagService } from '../tag/tag.service';
+import { Tag } from '@/entities/tag.entity';
+import { Stamp } from '@/entities/stamp.entity';
 
 @Module({
   imports: [
@@ -23,11 +24,11 @@ import { Book } from '@/entities/book.entity';
       },
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Happ, Tag, UserStamp, Stamp, Comment, Book]),
+    TypeOrmModule.forFeature([Happ, UserStamp, Comment, Book, Tag, Stamp]),
     AuthModule,
     EventsModule,
   ],
   controllers: [HappController],
-  providers: [HappService, ConfigService],
+  providers: [HappService, ConfigService, TagService],
 })
 export class HappModule {}

@@ -1,0 +1,7 @@
+{
+  "email": "test@example.com",
+  "nickname": "testuser",
+  "password": "testpassword",
+  "passwordConfirm": "testpassword",
+  "locale": "KR"
+}

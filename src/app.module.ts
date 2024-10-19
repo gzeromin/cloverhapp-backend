@@ -14,6 +14,8 @@ import { FriendModule } from './modules/friend/friend.module';
 import { TagModule } from './modules/tag/tag.module';
 import { MemoModule } from './modules/memo/memo.module';
 import { BookModule } from './modules/book/book.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { RequestThrottleInterceptor } from './interceptors/request-throttle.interceptor';
 
 @Module({
   imports: [
@@ -38,7 +40,12 @@ import { BookModule } from './modules/book/book.module';
     BookModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestThrottleInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
