@@ -1,4 +1,4 @@
-import { Happ } from '@/entities/Happ.entity';
+import { Happ } from '@/entities/happ.entity';
 
 export class UpdateHappResDto {
   updated: Happ;

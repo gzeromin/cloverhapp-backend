@@ -13,7 +13,7 @@ import { UserStamp } from '@/entities/user-stamp.entity';
 import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from '@/middlewares/multerS3.middleware';
-import { Happ } from '@/entities/Happ.entity';
+import { Happ } from '@/entities/happ.entity';
 
 @Module({
   imports: [

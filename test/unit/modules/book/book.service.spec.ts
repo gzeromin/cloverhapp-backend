@@ -1,8 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BookService } from './book.service';
+import { BookService } from '@/modules/book/book.service';
+import { Book } from '@/entities/book.entity';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('BookService', () => {
   let service: BookService;
+  let bookRepository: Repository<Book>;
+  let bookDto: Book;
+  let response: Response;
+  let foundBook: Book;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -10,9 +17,39 @@ describe('BookService', () => {
     }).compile();
 
     service = module.get<BookService>(BookService);
+    bookRepository = module.get<Repository<Book>>(getRepositoryToken(Book));  // getRepositoryToken을 통해 mock된 Repository 가져오기
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('성공적으로 책 정보를 반환하는 케이스', async () => {
+    // Given: mock data 설정
+    foundBook = {
+      id: '26137ac8-220c-47d3-aa5e-4c68d4eccd80',
+    } as Book;
+
+    // bookRepository.findOne을 mock 처리하여 데이터를 반환하도록 설정
+    jest.spyOn(bookRepository, 'findBy').mockResolvedValueOnce([foundBook]);
+
+    // when: getById 호출
+    const result = await service.getById('26137ac8-220c-47d3-aa5e-4c68d4eccd80');
+
+    // then: 결과 검증
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: '26137ac8-220c-47d3-aa5e-4c68d4eccd80',
+        title: 'Sample Book',
+        contents: 'This is a sample content',
+      }),
+    );
+  });
+
+  it('해당 ID의 책을 찾을 수 없는 경우 null 반환', async () => {
+    // Given: 책이 없을 때의 상황 설정
+    jest.spyOn(bookRepository, 'findOne').mockResolvedValueOnce(null);
+
+    // when: getById 호출 (존재하지 않는 ID로)
+    const result = await service.getById('non-existing-id');
+
+    // then: 결과가 null이어야 함을 확인
+    expect(result).toBeNull();
   });
 });

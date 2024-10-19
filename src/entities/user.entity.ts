@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcryptjs';
 import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
-import { Happ } from 'src/entities/Happ.entity';
+import { Happ } from 'src/entities/happ.entity';
 import { Locale } from 'src/enums/user-locale.enum';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';

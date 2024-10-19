@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserStampService } from '../../../../src/modules/user-stamp/user-stamp.service';
+import { UserStampService } from '@/modules/user-stamp/user-stamp.service';
 
 describe('UserStampService', () => {
   let service: UserStampService;

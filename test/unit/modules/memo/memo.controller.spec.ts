@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MemoController } from '../../../../src/modules/memo/memo.controller';
+import { MemoController } from '@/modules/memo/memo.controller';
 
 describe('MemoController', () => {
   let controller: MemoController;

@@ -7,7 +7,7 @@ import { EventsModule } from '@/events/events.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from '@/middlewares/multerS3.middleware';
-import { Happ } from '@/entities/Happ.entity';
+import { Happ } from '@/entities/happ.entity';
 import { Tag } from '@/entities/tag.entity';
 import { Comment } from '@/entities/comment.entity';
 import { UserStamp } from '@/entities/user-stamp.entity';

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HappController } from '../../../../src/modules/happ/happ.controller';
+import { HappController } from '@/modules/happ/happ.controller';
 
 describe('HappController', () => {
   let controller: HappController;

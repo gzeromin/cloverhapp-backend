@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { StampController } from '../../../../src/modules/stamp/stamp.controller';
+import { StampController } from '@/modules/stamp/stamp.controller';
 
 describe('StampController', () => {
   let controller: StampController;
