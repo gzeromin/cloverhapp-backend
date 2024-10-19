@@ -14,6 +14,9 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from '@/middlewares/multerS3.middleware';
 import { Happ } from '@/entities/Happ.entity';
+import { UserStampService } from '../user-stamp/user-stamp.service';
+import { Tag } from '@/entities/tag.entity';
+import { TagService } from '../tag/tag.service';
 
 @Module({
   imports: [
@@ -33,10 +36,24 @@ import { Happ } from '@/entities/Happ.entity';
       },
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User, Happ, Notif, Stamp, UserStamp, Friend]),
+    TypeOrmModule.forFeature([
+      User,
+      Happ,
+      Notif,
+      Stamp,
+      UserStamp,
+      Friend,
+      Tag,
+    ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, ConfigService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    ConfigService,
+    UserStampService,
+    TagService,
+  ],
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}

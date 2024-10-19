@@ -30,11 +30,17 @@ import { PasswordCheckPipe } from './pipe/password-check.pipe';
 import { WithdrawalDto } from './dto/withdrawal.dto';
 import { KeyValueDto } from './dto/key-value.dto';
 import { SentenceDto } from './dto/sentence.dto';
+import { UserStampService } from '../user-stamp/user-stamp.service';
+import { UserStamp } from '@/entities/user-stamp.entity';
+import { loginResDto } from './dto/login-res.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly userStampService: UserStampService,
+  ) {}
 
   @ApiOperation({
     summary: '모든 유저 리스트 반환',
@@ -63,9 +69,10 @@ export class AuthController {
 
   @Get('/me')
   @UseGuards(AuthGuard())
-  me(@GetUser() user: User) {
+  async me(@GetUser() user: User): Promise<loginResDto> {
     delete user.password;
-    return { user };
+    const userStamps = await this.userStampService.getAllUserStamps(user.id);
+    return { user, userStamps };
   }
 
   @Get('/logout')
@@ -110,19 +117,23 @@ export class AuthController {
     description: '시스템 에러 발생',
   })
   @Post('/signup')
-  signUp(
+  async signUp(
     @Body(ValidationPipe, PasswordCheckPipe) signUpDto: SignUpDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<{ user: User }> {
-    return this.authService.createUser(signUpDto, response);
+  ): Promise<loginResDto> {
+    const user = await this.authService.createUser(signUpDto, response);
+    const userStamps = await this.userStampService.getAllUserStamps(user.id);
+    return { user, userStamps };
   }
 
   @Post('/signin')
-  signIn(
+  async signIn(
     @Body(ValidationPipe) signInDto: SignInDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<{ user: User }> {
-    return this.authService.signIn(signInDto, response);
+  ): Promise<loginResDto> {
+    const user = await this.authService.signIn(signInDto, response);
+    const userStamps = await this.userStampService.getAllUserStamps(user.id);
+    return { user, userStamps };
   }
 
   @Post('/password')

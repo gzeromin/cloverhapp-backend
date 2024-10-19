@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Happ } from '../../entities/happ.entity';
 import { CreateHappDto } from './dto/create-happ.dto';
 import { UpdateHappDto } from './dto/update-happ.dto';
@@ -248,7 +248,18 @@ export class HappService {
       }
 
       // save Happ
-      return await this.happRepository.save(happList);
+      const savedHappList = await this.happRepository.save(happList);
+
+      const happs = await this.happRepository
+        .createQueryBuilder('happ')
+        .leftJoinAndSelect('happ.User', 'User')
+        .leftJoinAndSelect('happ.UserStamp', 'UserStamp')
+        .leftJoinAndSelect('UserStamp.Stamp', 'Stamp')
+        .orderBy('happ.startTime', 'DESC')
+        .where({ id: In(savedHappList.map((e) => e.id)) })
+        .getMany();
+
+      return happs;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException();

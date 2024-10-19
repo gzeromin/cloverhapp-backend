@@ -80,6 +80,14 @@ export class Stamp extends Common {
   status: StampStatus;
 
   @ApiProperty({
+    description: '스탬프 삭제',
+    example: false,
+    required: false,
+  })
+  @Column({ default: false })
+  deleteFlag: boolean;
+
+  @ApiProperty({
     description: '등록자의 uuid',
     required: true,
   })

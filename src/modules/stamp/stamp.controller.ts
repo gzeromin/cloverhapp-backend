@@ -5,6 +5,7 @@ import {
   Get,
   Logger,
   Param,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -25,6 +26,7 @@ import validationErrorUtils from '@/utils/validation-error.utils';
 import { FormException } from '@/exceptions/form.exception';
 import { s3DeleteFile } from '@/utils/multerS3.util';
 import { ConfigService } from '@nestjs/config';
+import { UpdateStampDto } from './dto/update-stamp.dto';
 
 @ApiTags('stamp')
 @Controller('stamp')
@@ -44,6 +46,14 @@ export class StampController {
     @Query('count') count: string,
   ): Promise<Stamp[]> {
     return this.stampService.getAllStamps(page, count);
+  }
+
+  @ApiOperation({
+    summary: 'Get stamp by Id',
+  })
+  @Get('/:id')
+  getStampById(@Param('id') id: string): Promise<Stamp> {
+    return this.stampService.getStampById(id);
   }
 
   @ApiOperation({
@@ -69,22 +79,26 @@ export class StampController {
       }
       throw new FormException(validationErrorUtils(errors, user.locale));
     }
-    return this.stampService.createStamp(stampData, user, file.location);
+    return await this.stampService.createStamp(stampData, user, file.location);
   }
 
   @ApiOperation({
-    summary: 'Get stamp by Id',
+    summary: '스탬프 수정',
   })
-  @Get('/:id')
-  getStampById(@Param('id') id: string): Promise<Stamp> {
-    return this.stampService.getStampById(id);
+  @Patch()
+  @UseGuards(AuthGuard())
+  async updateStamp(
+    @GetUser() user: User,
+    @Body() stampData: UpdateStampDto,
+  ): Promise<Stamp> {
+    return await this.stampService.updateStamp(stampData, user);
   }
 
   @ApiOperation({
     summary: '',
   })
   @Delete('/:id')
-  deleteStamp(@Param('id') id: string): Promise<void> {
+  deleteStamp(@Param('id') id: string): Promise<Stamp> {
     return this.stampService.deleteStamp(id);
   }
 }

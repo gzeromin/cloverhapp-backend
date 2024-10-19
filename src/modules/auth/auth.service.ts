@@ -106,10 +106,7 @@ export class AuthService {
     }
   }
 
-  async createUser(
-    signUpDto: SignUpDto,
-    response: Response,
-  ): Promise<{ user: User }> {
+  async createUser(signUpDto: SignUpDto, response: Response): Promise<User> {
     const { email, nickname, password, locale } = signUpDto;
 
     const user = this.userRepository.create({
@@ -152,7 +149,7 @@ export class AuthService {
 
       await this.userStampRepository.save(userStamps);
 
-      return { user: createdUser };
+      return createdUser;
     } catch (error) {
       this.logger.error(error);
       if (error instanceof QueryFailedError) {
@@ -171,10 +168,7 @@ export class AuthService {
     }
   }
 
-  async signIn(
-    signInDto: SignInDto,
-    response: Response,
-  ): Promise<{ user: User }> {
+  async signIn(signInDto: SignInDto, response: Response): Promise<User> {
     const { email, password, locale } = signInDto;
     const user = await this.userRepository.findOneBy({ email });
 
@@ -195,7 +189,7 @@ export class AuthService {
       });
       user.notifNum = notifNum;
 
-      return { user };
+      return user;
     } else {
       throw new LoginException($t(locale).LoginFailed);
     }
