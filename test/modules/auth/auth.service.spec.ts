@@ -113,10 +113,10 @@ describe('AuthService', () => {
       const result = await service.createUser(signUpDto, response);
 
       // 패스워드 지워졌는지 확인하기
-      expect(result.user.password).toBeUndefined();
+      expect(result.password).toBeUndefined();
 
       // 결과 확인
-      expect(result.user).toEqual(
+      expect(result).toEqual(
         expect.objectContaining({
           email: signUpDto.email,
           nickname: signUpDto.nickname,

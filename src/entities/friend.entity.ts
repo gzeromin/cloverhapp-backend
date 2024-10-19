@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToMany, ManyToOne } from 'typeorm';
 import Common from './common.entity';
 import { User } from './user.entity';
 import { UserStamp } from './user-stamp.entity';
-import { Happ } from './Happ.entity';
+import { Happ } from './happ.entity';
 
 @Entity()
 export class Friend extends Common {

@@ -1,11 +1,11 @@
 import * as bcrypt from 'bcryptjs';
 import { IsEmail, IsString, Max, MaxLength, MinLength } from 'class-validator';
-import { Happ } from 'src/entities/Happ.entity';
 import { Locale } from 'src/enums/user-locale.enum';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
 import Common from './common.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Happ } from './happ.entity';
 
 @Entity()
 export class User extends Common {

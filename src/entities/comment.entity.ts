@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import Common from './common.entity';
 import { User } from './user.entity';
-import { Happ } from './Happ.entity';
+import { Happ } from './happ.entity';
 
 @Entity()
 export class Comment extends Common {
