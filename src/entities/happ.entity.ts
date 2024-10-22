@@ -1,6 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
-import { User } from 'src/entities/user.entity';
 import {
   Column,
   Entity,
@@ -12,13 +9,16 @@ import {
 } from 'typeorm';
 import Common from './common.entity';
 import { UserStamp } from './user-stamp.entity';
-import { Tag } from './tag.entity';
-import { Comment } from './comment.entity';
-import { MoneyUnit } from '@/enums/money-unit.enum';
-import { TodoStatus } from '@/enums/todo-status.enum';
 import { Friend } from './friend.entity';
-import { StampStatus } from '@/enums/stamp-status.enum';
+import { Tag } from './tag.entity';
 import { Book } from './book.entity';
+import { User } from './user.entity';
+import { StampStatus } from '@/enums/stamp-status.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import { TodoStatus } from '@/enums/todo-status.enum';
+import { MoneyUnit } from '@/enums/money-unit.enum';
+import { IsNotEmpty } from 'class-validator';
+import { Comment } from './comment.entity';
 
 @Entity()
 export class Happ extends Common {

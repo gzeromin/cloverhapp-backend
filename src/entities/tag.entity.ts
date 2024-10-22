@@ -1,10 +1,10 @@
 import { Column, Entity, ManyToMany } from 'typeorm';
 import Common from './common.entity';
-import { Happ } from './happ.entity';
 import { UserStamp } from './user-stamp.entity';
 import { Stamp } from './stamp.entity';
 import { MaxLength, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Happ } from './happ.entity';
 
 @Entity()
 export class Tag extends Common {

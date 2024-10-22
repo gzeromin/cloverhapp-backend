@@ -27,9 +27,9 @@ import { WithdrawalDto } from './dto/withdrawal.dto';
 import { ConfigService } from '@nestjs/config';
 import { s3DeleteFile } from '@/utils/multerS3.util';
 import { LoginException } from '@/exceptions/login.exception';
-import { Happ } from '@/entities/happ.entity';
 import { KeyValueDto } from './dto/key-value.dto';
 import { SentenceDto } from './dto/sentence.dto';
+import { Happ } from '@/entities/happ.entity';
 
 @Injectable()
 export class AuthService {

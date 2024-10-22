@@ -71,7 +71,7 @@ describe('AuthController (e2e)', () => {
       expect(response.headers['set-cookie']).toBeDefined();
     });
 
-    it('[400]패스워드 확인이 일치하지 않을 때 에러', async () => {
+    it('[400]패스워드 확인이 일치하지 않을 때 에러(한국어일때)', async () => {
       signUpDto.passwordConfirm = 'invalid';
 
       const response = await request(app.getHttpServer())
@@ -79,9 +79,11 @@ describe('AuthController (e2e)', () => {
         .send(signUpDto)
         .expect(400);
 
-      expect(response.body.message).toContain('Invalid password');
+      expect(response.body.message).toContain('패스워드가 일치하지 않습니다.');
     });
 
-    // it('[폼에러] 이메일 형식이 아닐 때', async () => {});
+    it('[폼에러] 이메일 형식이 아닐 때', async () => {
+      signUpDto.email = 'hoho';
+    });
   });
 });

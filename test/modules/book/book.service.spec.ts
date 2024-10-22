@@ -1,8 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BookService } from '@/modules/book/book.service';
-import { Book } from '@/entities/book.entity';
-import { Repository } from 'typeorm';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { Test, TestingModule } from '@nestjs/testing';
 
 describe('BookService', () => {
   let service: BookService;
@@ -51,5 +48,26 @@ describe('BookService', () => {
 
     // then: 결과가 null이어야 함을 확인
     expect(result).toBeNull();
+  });
+
+  describe('getById', () => {
+    it('성공케이스', () => {
+      // Given
+      // Dto
+      // When
+      // getById(id)
+      // Then
+      // Book
+    });
+
+    it('실패케이스(시스템에러발생)', () => {
+      // Given
+      // Dto
+      // mockup -> findOneBy error
+      // When
+      // getById(id)
+      // Then
+      // 500
+    });
   });
 });
