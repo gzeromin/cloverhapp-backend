@@ -220,12 +220,12 @@ export class HappService {
           happ.Book = Book;
         }
         happ.bookPercent = bookPercent;
-        const userStamp = happ.UserStamp;
-        userStamp.Book = happ.Book;
-        userStamp.bookPercent = happ.bookPercent;
+        happ.UserStamp = UserStamp;
+        happ.UserStamp.Book = happ.Book;
+        happ.UserStamp.bookPercent = happ.bookPercent;
 
         // UserStamp 갱신
-        await this.userStampRepository.save(userStamp);
+        await this.userStampRepository.save(happ.UserStamp);
         happ.UserStamp.Book = Book;
       }
 
