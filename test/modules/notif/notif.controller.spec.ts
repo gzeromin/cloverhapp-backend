@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotifController } from '../../../../src/modules/notif/notif.controller';
+import { NotifController } from '@/modules/notif/notif.controller';
 
 describe('NotifController', () => {
   let controller: NotifController;

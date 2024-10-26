@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotifService } from '../../../../src/modules/notif/notif.service';
+import { NotifService } from '@/modules/notif/notif.service';
 
 describe('NotifService', () => {
   let service: NotifService;

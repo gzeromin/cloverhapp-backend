@@ -10,6 +10,9 @@ async function bootstrap() {
   const logger = new Logger();
   const app = await NestFactory.create(AppModule);
 
+  const globalPrefix = 'api';
+  app.setGlobalPrefix(globalPrefix);
+
   app.useGlobalFilters(new BadRequestFilter());
   app.use(cookieParser());
 
@@ -32,9 +35,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
-
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
 
   await app.listen(port);
   logger.log(`Application running on port ${port}`);
