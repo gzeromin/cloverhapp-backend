@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { StampService } from './stamp.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -89,7 +90,7 @@ export class StampController {
   @UseGuards(AuthGuard())
   async updateStamp(
     @GetUser() user: User,
-    @Body() stampData: UpdateStampDto,
+    @Body(ValidationPipe) stampData: UpdateStampDto,
   ): Promise<Stamp> {
     return await this.stampService.updateStamp(stampData, user);
   }
