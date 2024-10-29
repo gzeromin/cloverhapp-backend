@@ -144,6 +144,7 @@ export class AuthService {
           memo: stamp.description,
           displayOrder: order,
           status: stamp.status,
+          Tags: stamp.Tags,
         });
       });
 
