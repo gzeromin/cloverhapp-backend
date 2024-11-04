@@ -17,7 +17,6 @@ import { SaveUserStampDto } from './dto/save-user-stamp.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateUserStampDto } from './dto/update-user-stamp.dto';
-import { UpdateIsDisplayDto } from './dto/update-is-display.dto';
 import { UserStamp } from '@/entities/user-stamp.entity';
 import { SaveUserStampResDto } from './dto/save-user-stamp-res.dto';
 
@@ -69,6 +68,7 @@ export class UserStampController {
     summary: '',
   })
   @Delete('/:id')
+  @UseGuards(AuthGuard())
   deleteStamp(@Param('id') id: string): Promise<UserStamp[]> {
     return this.userStampService.deleteUserStamp(id);
   }

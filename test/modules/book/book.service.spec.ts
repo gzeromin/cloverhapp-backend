@@ -24,11 +24,11 @@ describe('BookService', () => {
         },
       ],
     }).compile();
-  
+
     service = module.get<BookService>(BookService);
     bookRepository = module.get<Repository<Book>>(getRepositoryToken(Book));
   });
-  
+
   describe('getById', () => {
     it('성공케이스', async () => {
       // Given

@@ -53,7 +53,8 @@ export class UserStampService {
         take: perPage,
       });
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -121,7 +122,7 @@ export class UserStampService {
 
       // 4. 저장된 UserStamps 조회
       const userStamps = await queryRunner.manager.find(UserStamp, {
-        where: { userId: user.id },
+        where: { userId: user.id, deleteFlag: false },
         relations: ['Stamp', 'Book'],
         order: { displayOrder: 'ASC' },
       });
@@ -138,7 +139,8 @@ export class UserStampService {
     } catch (error) {
       // 오류 발생 시 롤백
       await queryRunner.rollbackTransaction();
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     } finally {
       // 트랜잭션 종료
       await queryRunner.release();
