@@ -10,10 +10,6 @@ describe('BookService', () => {
   let service: BookService;
   let bookRepository: Repository<Book>;
 
-  const mockBookService = {
-    createBook: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
