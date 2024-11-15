@@ -5,7 +5,6 @@ import {
   Get,
   Logger,
   Param,
-  Patch,
   Post,
   Query,
   UseGuards,
@@ -42,8 +41,9 @@ export class UserStampController {
   }
 
   @Get('/:id')
-  getUserStampById(@Param('id') id: string) {
-    return this.userStampService.getUserStampById(id);
+  @UseGuards(AuthGuard())
+  getUserStampById(@GetUser() user: User, @Param('id') id: string) {
+    return this.userStampService.getUserStampById(user.id, id);
   }
 
   @Post()

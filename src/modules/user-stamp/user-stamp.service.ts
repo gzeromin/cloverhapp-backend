@@ -58,11 +58,16 @@ export class UserStampService {
     }
   }
 
-  async getUserStampById(id: string): Promise<UserStamp> {
-    return await this.userStampRepository.findOne({
-      where: { id, deleteFlag: false },
+  async getUserStampById(userId: string, id: string): Promise<UserStamp> {
+    const res = await this.userStampRepository.findOne({
+      where: { userId, id, deleteFlag: false },
       relations: ['Stamp', 'Book'],
     });
+    if (!res) {
+      console.log(res);
+      throw new NotFoundException(`Can't find UserStamp with id ${id}`);
+    }
+    return res;
   }
 
   async saveUserStamp(
@@ -104,6 +109,7 @@ export class UserStampService {
         alias: data.name,
         memo: data.description,
         status: data.stampStatus,
+        Tags: data.Tags,
       });
 
       // 2. 기존의 모든 스탬프의 isDisplay 값을 +1 증가
@@ -118,7 +124,7 @@ export class UserStampService {
         .execute();
 
       // 3. 새로운 UserStamp 저장
-      await queryRunner.manager.save(userStamp);
+      const savedUserStamp = await queryRunner.manager.save(userStamp);
 
       // 4. 저장된 UserStamps 조회
       const userStamps = await queryRunner.manager.find(UserStamp, {
@@ -135,7 +141,11 @@ export class UserStampService {
       // 6. 트랜잭션 커밋
       await queryRunner.commitTransaction();
 
-      return { droplet: updatedUser.droplet, userStamps };
+      return {
+        droplet: updatedUser.droplet,
+        userStamps,
+        userStampId: savedUserStamp.id,
+      };
     } catch (error) {
       // 오류 발생 시 롤백
       await queryRunner.rollbackTransaction();

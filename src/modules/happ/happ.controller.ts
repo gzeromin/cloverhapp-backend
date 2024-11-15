@@ -56,6 +56,15 @@ export class HappController {
   @ApiOperation({
     summary: '',
   })
+  @Get('/list/:userId')
+  @UseGuards(AuthGuard())
+  getAllHappsByUserId(@Param('userId') userId: string): Promise<Happ[]> {
+    return this.happService.getAllHappsByUserId(userId);
+  }
+
+  @ApiOperation({
+    summary: '',
+  })
   @Get('/list/:date/:userId')
   getHappsByDate(
     @Param('date') date: string,

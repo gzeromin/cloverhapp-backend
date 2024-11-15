@@ -5,6 +5,7 @@ import { PickType } from '@nestjs/swagger';
 export class SaveUserStampDto extends PickType(UserStamp, [
   'stampId',
   'userId',
+  'Tags',
 ] as const) {
   stampStatus: StampStatus;
   registerId: string;

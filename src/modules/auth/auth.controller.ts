@@ -192,7 +192,7 @@ export class AuthController {
     if (!file) {
       throw new Error($t(user.locale).ProfilePhotoUploadFailed);
     }
-    return this.authService.updatePhotoUrl(user, file.location);
+    return this.authService.updatePhoto(user, file.location);
   }
 
   @Post('/withdrawal')

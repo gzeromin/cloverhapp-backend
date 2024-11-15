@@ -14,6 +14,7 @@ import { TagService } from '../tag/tag.service';
 import { Tag } from '@/entities/tag.entity';
 import { Stamp } from '@/entities/stamp.entity';
 import { Happ } from '@/entities/happ.entity';
+import { Friend } from '@/entities/friend.entity';
 
 @Module({
   imports: [
@@ -24,7 +25,15 @@ import { Happ } from '@/entities/happ.entity';
       },
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Happ, UserStamp, Comment, Book, Tag, Stamp]),
+    TypeOrmModule.forFeature([
+      Happ,
+      UserStamp,
+      Comment,
+      Book,
+      Tag,
+      Stamp,
+      Friend,
+    ]),
     AuthModule,
     EventsModule,
   ],

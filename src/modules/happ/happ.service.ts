@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CreateHappDto } from './dto/create-happ.dto';
 import { UpdateHappDto } from './dto/update-happ.dto';
 import { UpdateByDndDto } from './dto/update-by-dnd.dto';
@@ -22,6 +22,9 @@ import { UpdateHappResDto } from './dto/updated-happ-res-dto';
 import { Book } from '@/entities/book.entity';
 import { TagService } from '../tag/tag.service';
 import { Happ } from '@/entities/happ.entity';
+import { Comment } from '@/entities/comment.entity';
+import { Friend } from '@/entities/friend.entity';
+import { StampStatus } from '@/enums/stamp-status.enum';
 
 @Injectable()
 export class HappService {
@@ -32,6 +35,10 @@ export class HappService {
     private userStampRepository: Repository<UserStamp>,
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
+    @InjectRepository(Comment)
+    private commentRepository: Repository<Comment>,
+    @InjectRepository(Friend)
+    private friendRepository: Repository<Friend>,
     private configService: ConfigService,
     private readonly tagService: TagService,
   ) {}
@@ -66,6 +73,45 @@ export class HappService {
       return happs;
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  async getAllHappsByUserId(userId: string): Promise<Happ[]> {
+    try {
+      // 친구 목록을 가져와 friendId만 추출합니다.
+      const friends = await this.friendRepository
+        .createQueryBuilder('friend')
+        .where('friend.userId = :userId', { userId })
+        .select('friend.friendId')
+        .getMany();
+      const friendIds = friends.map((friend) => friend.friendId);
+
+      const happs = await this.happRepository
+        .createQueryBuilder('happ')
+        .leftJoinAndSelect('happ.User', 'User')
+        .leftJoinAndSelect('happ.UserStamp', 'UserStamp')
+        .leftJoinAndSelect('UserStamp.Stamp', 'Stamp')
+        .orderBy('happ.startTime', 'DESC')
+        .where(
+          `(happ.status = :publicStatus)
+           OR (happ.status = :friendStatus AND happ.userId IN (:...friendIds))
+           OR (happ.status = :privateStatus AND happ.userId = :userId)`,
+          {
+            publicStatus: StampStatus.PUBLIC,
+            friendStatus: StampStatus.FRIEND,
+            privateStatus: StampStatus.PRIVATE,
+            friendIds: friendIds.length ? friendIds : [null], // 친구가 없을 경우 빈 배열을 피하기 위해 [null]을 설정
+            userId,
+          },
+        )
+        .andWhere('happ.todo != :todoStatus', { todoStatus: TodoStatus.TODO })
+        .take(30)
+        .getMany();
+
+      return happs;
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
   }
 
@@ -139,6 +185,7 @@ export class HappService {
   async getHappById(id: string): Promise<Happ> {
     const query = this.happRepository.createQueryBuilder('happ');
     query
+      .leftJoinAndSelect('happ.User', 'User')
       .leftJoinAndSelect('happ.Tags', 'Tags')
       .leftJoinAndSelect('happ.UserStamp', 'UserStamp')
       .leftJoinAndSelect('UserStamp.Stamp', 'Stamp')
@@ -147,18 +194,19 @@ export class HappService {
       .leftJoinAndSelect('Friends.Friend', 'Friend')
       .where(`happ.id = :id`, { id });
     const found = await query.getOne();
+
     if (!found) {
       throw new NotFoundException(`Can't find Happ with id ${id}`);
     }
 
-    // const comments = await this.commentRepository.find({
-    //   where: { happId: found.id },
-    //   relations: ['User'],
-    //   order: { createdAt: 'DESC' },
-    // });
+    const comments = await this.commentRepository.find({
+      where: { happId: found.id },
+      relations: ['User'],
+      order: { createdAt: 'DESC' },
+    });
 
     // 코멘트 가져오기
-    // found.Comments = comments;
+    found.Comments = comments;
     return found;
   }
 

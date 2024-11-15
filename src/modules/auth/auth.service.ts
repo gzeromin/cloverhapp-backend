@@ -334,10 +334,13 @@ export class AuthService {
     }
   }
 
-  async updatePhotoUrl(
+  async updatePhoto(
     user: User,
     filePath: string,
   ): Promise<{ filePath: string }> {
+    if (user.photoUrl) {
+      this.deletePhoto(user);
+    }
     await this.userRepository.update(user.id, { photoUrl: filePath });
     return { filePath };
   }
