@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcryptjs';
-import { IsEmail, IsString, Max, MaxLength, MinLength } from 'class-validator';
+import { Allow, IsEmail, IsString, Max, MaxLength, MinLength } from 'class-validator';
 import { Locale } from 'src/enums/user-locale.enum';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
@@ -74,6 +74,7 @@ export class User extends Common {
     enum: Locale,
     required: true,
   })
+  @Allow()
   @Column({
     default: Locale.Kr,
   })

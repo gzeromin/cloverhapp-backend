@@ -12,8 +12,11 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { SignUpDto } from '@/modules/auth/dto/sign-up.dto';
 import { Locale } from '@/enums/user-locale.enum';
-import { readJson } from 'test/utils/readJson';
+import { readJson } from '../../utils/readJson';
 import { Happ } from '@/entities/happ.entity';
+import { FormException } from '@/exceptions/form.exception';
+import formErrorUtils from '@/utils/form-error.utils';
+import { InternalServerErrorException } from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -91,21 +94,22 @@ describe('AuthService', () => {
       response = {
         cookie: jest.fn(),
       } as any;
+
+      createdUser = {
+        email: signUpDto.email,
+        nickname: signUpDto.nickname,
+        password: signUpDto.password,
+        locale: Locale.Kr,
+      } as User;
     });
 
     it('성공적으로 유저 생성하는 케이스', async () => {
       // Given
-      createdUser = {
-        email: 'test@example.com',
-        nickname: 'testuser',
-        password: 'testpassword',
-        locale: Locale.Kr,
-      } as User;
 
       jest.spyOn(userRepository, 'create').mockReturnValueOnce(createdUser);
       jest
         .spyOn(userRepository, 'save')
-        .mockResolvedValueOnce({ ...signUpDto, id: 'userId' } as any);
+        .mockResolvedValueOnce({ ...createdUser, id: 'userId' } as any);
       jest.spyOn(jwtService, 'sign').mockReturnValue('mockedToken');
       jest.spyOn(stampRepository, 'findBy').mockResolvedValueOnce([]);
       jest.spyOn(userStampRepository, 'save').mockResolvedValueOnce(null);
@@ -124,8 +128,36 @@ describe('AuthService', () => {
       );
     });
 
-    // it('이미 등록된 닉네임 저장할 때 폼에러가 발생하는 케이스', async () => {});
+    it('이미 등록된 닉네임 저장할 때 폼에러가 발생하는 케이스', async () => {
+      // Given
+      createdUser.nickname = 'exisitinguser';
+      signUpDto.nickname = 'exisitinguser';
+      const keys = ['nickname'];
+      const errorMessages = ['Key (nickname)=(exisitinguser) already exists.'];
 
-    // it('시스템 에러 발생하는 케이스', async () => {});
+      // Mock
+      jest.spyOn(userRepository, 'findBy').mockResolvedValueOnce([createdUser] as User[]); // 이미 'testuser'라는 nickname이 존재한다고 가정
+      jest.spyOn(userRepository, 'create').mockImplementation(() => {
+        throw new FormException(formErrorUtils(keys, errorMessages, Locale.Kr));
+      });
+
+      const result = service.createUser(signUpDto, response);
+      // 결과확인
+      await expect(result).rejects.toThrow(FormException);
+    });
+
+    it('시스템 에러 발생하는 케이스', async () => {
+      // mockup -> save error
+      jest.spyOn(userRepository, 'create').mockReturnValueOnce(createdUser);
+      jest.spyOn(userRepository, 'save').mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      // createUser
+      const result = service.createUser(signUpDto, response);
+      // Then
+      // 500
+      await expect(result).rejects.toThrow(InternalServerErrorException);
+    });
   });
 });
